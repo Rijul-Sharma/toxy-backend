@@ -19,6 +19,13 @@ export const createRoom = async (req,res) => {
         await newRoom.save();
         const user = await userModel.findOne({_id : user_id})
         user.rooms.push(newRoom._id);
+        
+        // Initialize read status for the new room
+        user.roomReadStatus.push({
+            roomId: newRoom._id,
+            lastReadAt: new Date()
+        });
+        
         await user.save()
         // const populatedRoom = await newRoom.populate('createdBy').populate('users')
         return res.status(200).json({
@@ -55,6 +62,18 @@ export const joinRoom = async (req,res) => {
         const user = await userModel.findOne({_id : user_id})
         if(!user) return res.status(404).json({response : "User not found"})
         user.rooms.push(room_id);
+        
+        // Initialize read status for the joined room
+        const existingReadStatus = user.roomReadStatus.find(
+            status => status.roomId.toString() === room_id
+        );
+        if (!existingReadStatus) {
+            user.roomReadStatus.push({
+                roomId: room_id,
+                lastReadAt: new Date()
+            });
+        }
+        
         await user.save()
 
         // const populatedRoom = await roomModel.findOne({ _id : room_id}).populate('createdBy').populate('users')

@@ -21,7 +21,18 @@ const userSchema = Schema({
     icon : {
         type: Schema.Types.ObjectId,
         ref: 'image'
-    }
+    },
+    roomReadStatus: [{
+        roomId: {
+            type: Schema.Types.ObjectId,
+            ref: 'room',
+            required: true
+        },
+        lastReadAt: {
+            type: Date,
+            default: Date.now
+        }
+    }]
     },
     { versionKey: false }
 )
