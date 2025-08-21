@@ -21,24 +21,14 @@ export const uploadImage = async (req, res) => {
         });
         const savedImage = await newImage.save();
 
-        // Chat message media upload
+        // If chat message upload, just return media info, don't create message
         if (req.body.roomId && req.body.sender) {
-            // Dynamically import messageModel to avoid circular dependency
-            const messageModel = (await import('../models/message.js')).default;
             const mediaItem = {
                 type: fileType,
                 url: savedImage.url,
                 name: savedImage.name,
-                // thumbnail: can be added for videos later
             };
-            const newMessage = new messageModel({
-                content: req.body.content || '',
-                room_id: req.body.roomId,
-                sender: req.body.sender,
-                media: [mediaItem]
-            });
-            await newMessage.save();
-            return res.status(201).json({ message: 'Media message sent', messageObj: newMessage });
+            return res.status(201).json({ message: 'Media uploaded', media: mediaItem });
         }
 
         // Room icon upload
