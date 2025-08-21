@@ -13,22 +13,24 @@ export const setupSocketEvents = (io) => {
             console.log("A user has disconnected", socket.id)
         })
     
-        socket.on('sendMessage', async (roomId, content, sender)=> {
-            // console.log("sm called")
-            // console.log(roomId, 'room')
-            // console.log(content, 'this is content')
-            // console.log(sender, 'tis is the sender')
+        socket.on('sendMessage', async (roomId, content, sender, media = null) => {
             if(roomId){
-                const now = new Date();
-                const message = {
-                    content : content,
-                    room_id : roomId,
-                    sender : sender,
-                    sentAt : now.toISOString()
-                }
-                // console.log(message, 'this is message')
-                // console.log('Message received : ', content)
-                io.to(roomId).emit('receiveMessage', message)
+                // Save message to DB
+                const messageData = {
+                    content: content,
+                    room_id: roomId,
+                    sender: sender._id || sender, // handle both populated and id
+                    sentAt: new Date(),
+                    ...(media ? { media } : {})
+                };
+                const MessageModel = (await import('./models/message.js')).default;
+                let msg = new MessageModel(messageData);
+                await msg.save();
+                // Update room's lastMessage
+                await roomModel.findByIdAndUpdate(roomId, { lastMessage: msg._id });
+                // Populate sender and media for frontend
+                msg = await MessageModel.findById(msg._id).populate('sender');
+                io.to(roomId).emit('receiveMessage', msg);
             }
         })
 

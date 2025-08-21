@@ -15,7 +15,17 @@ const messageSchema = Schema({
     sender: {
         type: Schema.Types.ObjectId,
         ref: 'user',
-    }
+    },
+    media: [
+        {
+            type: {
+                type: String, // 'image', 'video', etc.
+            },
+            url: String,
+            thumbnail: String,
+            name: String
+        }
+    ]
     },
     { versionKey: false }
 )

@@ -12,6 +12,8 @@ export const uploadImage = async (req, res) => {
             return res.status(400).json({ error: 'No file provided' });
         }
 
+        const fileType = req.file.mimetype.startsWith('video') ? 'video' : 'image';
+
         const newImage = new imageModel({
             url: req.file.path,
             public_id: req.file.filename,
@@ -19,6 +21,27 @@ export const uploadImage = async (req, res) => {
         });
         const savedImage = await newImage.save();
 
+        // Chat message media upload
+        if (req.body.roomId && req.body.sender) {
+            // Dynamically import messageModel to avoid circular dependency
+            const messageModel = (await import('../models/message.js')).default;
+            const mediaItem = {
+                type: fileType,
+                url: savedImage.url,
+                name: savedImage.name,
+                // thumbnail: can be added for videos later
+            };
+            const newMessage = new messageModel({
+                content: req.body.content || '',
+                room_id: req.body.roomId,
+                sender: req.body.sender,
+                media: [mediaItem]
+            });
+            await newMessage.save();
+            return res.status(201).json({ message: 'Media message sent', messageObj: newMessage });
+        }
+
+        // Room icon upload
         if (req.body.roomId) {
             const room = await roomModel.findOne({_id: req.body.roomId});
             if (!room) {
@@ -35,7 +58,8 @@ export const uploadImage = async (req, res) => {
             room.icon = savedImage._id;
             await room.save()
         }
-        
+
+        // User icon upload
         if(req.body.userId){
             const user = await userModel.findOne({_id : req.body.userId});
             if(!user) {
