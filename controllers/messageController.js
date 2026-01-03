@@ -7,6 +7,7 @@ export const getAllMessages = async (req,res) => {
         const {room_id} = req.query;
         // console.log(room_id)
         let a = await messageModel.find({ room_id })
+        .sort({ sentAt: 1 }) 
         .populate('sender')
         // .populate({
         //     path : 'sender',
