@@ -9,18 +9,39 @@ import roomRoutes from './routes/roomRoutes.js'
 import imageRoutes from './routes/imageRoutes.js'
 import unreadRoutes from './routes/unreadRoutes.js'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { setupSocketEvents } from './socket.js';
 
 const app = express();
 
-app.use(cors());
+// CORS configuration with credentials support
+const corsOptions = {
+    origin: [
+        process.env.FRONTEND_URL || 'http://localhost:5173',
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:5173'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.use(cookieParser());
 
 const server = createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: '*',
+        origin: [
+            process.env.FRONTEND_URL || 'http://localhost:5173',
+            'http://localhost:5173',
+            'http://localhost:3000',
+            'http://127.0.0.1:5173'
+        ],
+        credentials: true,
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type']
       }
