@@ -1,7 +1,11 @@
 import express from 'express'
 import { createRoom, joinRoom, exitRoom, getRoomInfo, changeAdmin, kickMember, getRooms, editRoom } from '../controllers/roomController.js'
+import { verifyToken } from '../middlewares/authMiddleware.js'
 
 const router = express.Router()
+
+
+router.use(verifyToken)
 
 router.post('/create', createRoom)
 router.post('/join', joinRoom)
