@@ -9,14 +9,18 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
     res.cookie('accessToken', accessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'None',
+        sameSite: 'Lax',
+        domain: ".toxy.app",
+        path: '/',
         maxAge: 15 * 60 * 1000 // 15 minutes
     });
     
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: 'None',
+        sameSite: 'Lax',
+        domain: ".toxy.app",
+        path: '/',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 };
@@ -146,7 +150,9 @@ export const refreshAccessToken = async (req, res) => {
         res.cookie('accessToken', newAccessToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'None',
+            sameSite: 'Lax',
+            domain: ".toxy.app",
+            path: '/',
             maxAge: 15 * 60 * 1000 // 15 minutes
         });
         
@@ -162,17 +168,16 @@ export const refreshAccessToken = async (req, res) => {
 export const logout = async (req, res) => {
     try {
         // Clear both cookies
-        res.clearCookie('accessToken', {
+        const cookieOptions = {
             httpOnly: true,
             secure: true,
-            sameSite: 'None'
-        });
-        
-        res.clearCookie('refreshToken', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'None'
-        });
+            sameSite: 'Lax',
+            domain: '.toxy.app',
+            path: '/'
+        };
+
+        res.clearCookie('accessToken', cookieOptions);
+        res.clearCookie('refreshToken', cookieOptions);
         
         res.status(200).json({ message: "Logout successful" });
         
